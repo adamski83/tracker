@@ -60,50 +60,50 @@ export default function Home() {
   const loadFromDatabase = async () => {
     setLoadingFromDB(true);
     try {
-      console.log("📥 Ładuję dane z bazy...");
+      console.log("📥 Loading data from database...");
       const res = await fetch("/api/database");
       const json = await res.json();
 
       if (json.success) {
         setData(json.data);
         setFileName(`Database Records (${json.count} records)`);
-        setSearchTerm(""); // Wyczyść wyszukiwanie
-        setSelectedField("all"); // Resetuj pole
-        console.log("✅ Załadowano z bazy:", json.count, "rekordów");
+        setSearchTerm(""); // Clear search
+        setSelectedField("all"); // Reset field
+        console.log("✅ Loaded from database:", json.count, "records");
       } else {
-        console.error("❌ Błąd ładowania z bazy:", json.error);
-        alert(`Błąd ładowania z bazy: ${json.error}`);
+        console.error("❌ Database loading error:", json.error);
+        alert(`Database loading error: ${json.error}`);
       }
     } catch (error) {
-      console.error("❌ Błąd ładowania z bazy:", error);
-      alert("Błąd ładowania danych z bazy");
+      console.error("❌ Database loading error:", error);
+      alert("Error loading data from database");
     } finally {
       setLoadingFromDB(false);
     }
   };
 
-  // Funkcja do ładowania statystyk
+  // Function to load statistics
   const loadDatabaseStats = async () => {
     try {
       const res = await fetch("/api/database?stats=true");
       const stats = await res.json();
       setDatabaseStats(stats);
-      console.log("📊 Statystyki bazy:", stats);
+      console.log("📊 Database statistics:", stats);
     } catch (error) {
-      console.error("❌ Błąd ładowania statystyk:", error);
+      console.error("❌ Error loading statistics:", error);
     }
   };
 
-  // AUTOMATYCZNE ŁADOWANIE PRZY STARCIE STRONY
+  // AUTOMATIC LOADING ON PAGE START
   useEffect(() => {
-    console.log("🚀 Strona załadowana - ładuję dane...");
+    console.log("🚀 Page loaded - loading data...");
 
-    // Załaduj statystyki
+    // Load statistics
     loadDatabaseStats();
 
-    // Automatycznie załaduj dane z bazy
+    // Automatically load data from database
     loadFromDatabase();
-  }, []); // Puste dependency array = uruchom tylko raz przy starcie
+  }, []); // Empty dependency array = run only once on start
 
   const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -114,16 +114,16 @@ export default function Home() {
 
     if (!fileInput.files?.[0]) {
       setLoading(false);
-      alert("Wybierz plik CSV");
+      alert("Select CSV file");
       return;
     }
 
     const file = fileInput.files[0];
 
-    // Sprawdź czy to plik CSV
+    // Check if it's a CSV file
     if (!file.name.endsWith(".csv")) {
       setLoading(false);
-      alert("Wybierz plik CSV");
+      alert("Select CSV file");
       return;
     }
 
@@ -141,106 +141,106 @@ export default function Home() {
 
       if (json.success) {
         setData(json.data);
-        setSearchTerm(""); // Wyczyść wyszukiwanie po załadowaniu nowego pliku
-        setSelectedField("all"); // Resetuj wybór pola
+        setSearchTerm(""); // Clear search after loading new file
+        setSelectedField("all"); // Reset field selection
 
-        // Wyświetl dane w konsoli przeglądarki
-        console.log("=== DANE CSV W KONSOLI PRZEGLĄDARKI ===");
-        console.log("Nazwa pliku:", json.filename);
-        console.log("Liczba rekordów:", json.recordCount);
-        console.log("Dostępne pola:", Object.keys(json.data[0] || {}));
+        // Display data in browser console
+        console.log("=== CSV DATA IN BROWSER CONSOLE ===");
+        console.log("File name:", json.filename);
+        console.log("Record count:", json.recordCount);
+        console.log("Available fields:", Object.keys(json.data[0] || {}));
         console.log("JSON:");
         console.log(JSON.stringify(json.data, null, 2));
-        console.log("=== KONIEC DANYCH CSV ===");
+        console.log("=== END OF CSV DATA ===");
 
-        // Informacje o bazie danych
+        // Database information
         if (json.database) {
-          console.log("=== INFORMACJE O BAZIE DANYCH ===");
-          console.log("Nowe rekordy:", json.database.saved);
-          console.log("Duplikaty:", json.database.duplicates);
-          console.log("Łącznie:", json.database.total);
-          console.log("=== KONIEC INFORMACJI O BAZIE ===");
+          console.log("=== DATABASE INFORMATION ===");
+          console.log("New records:", json.database.saved);
+          console.log("Duplicates:", json.database.duplicates);
+          console.log("Total:", json.database.total);
+          console.log("=== END OF DATABASE INFO ===");
 
           alert(
-            `Plik ${json.filename} został przetworzony!\n` +
-              `Nowe rekordy: ${json.database.saved}\n` +
-              `Duplikaty: ${json.database.duplicates}\n` +
-              `Sprawdź konsolę przeglądarki (F12)`,
+            `File ${json.filename} has been processed!\n` +
+              `New records: ${json.database.saved}\n` +
+              `Duplicates: ${json.database.duplicates}\n` +
+              `Check browser console (F12)`,
           );
         } else {
           alert(
-            `Plik ${json.filename} został przetworzony! Sprawdź konsolę przeglądarki (F12)`,
+            `File ${json.filename} has been processed! Check browser console (F12)`,
           );
         }
 
-        // Odśwież statystyki po uploadzie
+        // Refresh statistics after upload
         loadDatabaseStats();
       } else {
-        alert(`Błąd: ${json.error}`);
+        alert(`Error: ${json.error}`);
       }
     } catch (error) {
-      console.error("Błąd podczas przesyłania pliku:", error);
-      alert("Błąd podczas przesyłania pliku");
+      console.error("Error during file upload:", error);
+      alert("Error during file upload");
     } finally {
       setLoading(false);
     }
   };
 
-  // Funkcja do wyczyścenia wyszukiwania
+  // Function to clear search
   const clearSearch = () => {
     setSearchTerm("");
     setSelectedField("all");
   };
 
-  // Funkcja do dodania elementu do emaila
+  // Function to add item to email
   const addItemToEmail = (item: Record<string, unknown>) => {
-    // Usuń metadata z elementu
+    // Remove metadata from item
 
     const { _metadata, ...cleanItem } = item;
 
-    // Sformatuj dane jako tekst
+    // Format data as text
     const itemText = Object.entries(cleanItem)
       .map(([key, value]) => `${key}: ${value}`)
       .join("\n");
 
-    // Dodaj do localStorage tymczasowo lub użyj innego sposobu
-    // Na razie pokażemy alert z danymi
-    const message = `--- Element z danych ---\n${itemText}`;
+    // Add to localStorage temporarily or use another method
+    // For now we'll show alert with data
+    const message = `--- Data Element ---\n${itemText}`;
 
-    // Możemy też skopiować do schowka
+    // We can also copy to clipboard
     navigator.clipboard
       .writeText(message)
       .then(() => {
         alert(
-          "Dane elementu zostały skopiowane do schowka! Możesz je wkleić w Email Manager.",
+          "Element data has been copied to clipboard! You can paste it in Email Manager.",
         );
       })
       .catch(() => {
-        alert(`Dane elementu:\n\n${message}`);
+        alert(`Element data:\n\n${message}`);
       });
   };
 
-  // Funkcja do dodania wiersza do wiadomości email
+  // Function to add row to email message
   const addRowToEmail = (row: Record<string, unknown>, index: number) => {
     if (!emailManagerRef || !filteredData) {
-      alert("Email Manager nie jest gotowy lub brak danych");
+      alert("Email Manager is not ready or no data available");
       return;
     }
 
-    // Usuń metadata z wiersza
+    // Remove metadata from row
     const { _metadata, ...cleanData } = row;
 
-    // Dodaj dane wiersza do wiadomości email
+    // Add row data to email message
     emailManagerRef.addRowDataToMessage(cleanData, index);
 
-    alert(`Dodano rekord #${index + 1} do wiadomości email!`);
+    alert(`Added record #${index + 1} to email message!`);
   };
 
   return (
     <div className="mx-auto p-8 w-full">
       <h1 className="text-3xl font-bold mb-8">CSV Reader with Database</h1>
 
-      {/* Statystyki bazy danych */}
+      {/* Database statistics */}
       {databaseStats && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
           <h3 className="font-semibold text-green-800 mb-2">
@@ -277,7 +277,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Formularz uploadu */}
+      {/* Upload form */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl text-black font-semibold mb-4">
           Upload New CSV
@@ -303,7 +303,7 @@ export default function Home() {
         </form>
       </div>
 
-      {/* Instrukcje */}
+      {/* Instructions */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
         <h3 className="font-semibold text-yellow-800 mb-2">Instructions:</h3>
         <ol className="list-decimal list-inside text-yellow-700 space-y-1">
@@ -324,12 +324,12 @@ export default function Home() {
       {/* Email Manager */}
       <EmailManager data={data || undefined} onRef={setEmailManagerRef} />
 
-      {/* Panel wyszukiwania */}
+      {/* Search panel */}
       {data && (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h3 className="text-lg text-black font-semibold mb-4">Search Data</h3>
 
-          {/* Wybór pola do wyszukiwania */}
+          {/* Field selection for search */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Search in field:
@@ -348,7 +348,7 @@ export default function Home() {
             </select>
           </div>
 
-          {/* Pole wyszukiwania */}
+          {/* Search field */}
           <div className="flex gap-4 items-center">
             <div className="flex-1">
               <input
@@ -371,7 +371,7 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Informacje o wynikach */}
+          {/* Results information */}
           <div className="mt-2 text-sm text-gray-600">
             {searchTerm && (
               <p>
@@ -386,7 +386,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Wyniki na stronie */}
+      {/* Results on page */}
       {data && (
         <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
           <h2 className="text-lg md:text-xl text-black font-semibold mb-4">
@@ -400,12 +400,12 @@ export default function Home() {
               : `Total records: ${data.length} (showing max 500)`}
           </p>
 
-          {/* Tabela z danymi */}
+          {/* Data table */}
           {filteredData && filteredData.length > 0 && (
             <div className="w-full">
-              {/* Informacja o przewijaniu na małych ekranach */}
+              {/* Information about scrolling on small screens */}
               <div className="text-xs text-gray-500 mb-2 md:hidden">
-                💡 Przesuń tabelę w prawo aby zobaczyć więcej kolumn
+                💡 Scroll table right to see more columns
               </div>
               <div className="overflow-x-auto overflow-y-auto max-h-80 border text-black border-gray-200 rounded text-sm">
                 <table className="w-full border-collapse min-w-max">
@@ -439,7 +439,7 @@ export default function Home() {
                           key={index}
                           className="hover:bg-blue-50 cursor-pointer transition-colors"
                           onClick={() => addRowToEmail(row, index)}
-                          title={`Kliknij aby dodać rekord #${index + 1} do wiadomości email`}
+                          title={`Click to add record #${index + 1} to email message`}
                         >
                           {Object.entries(displayData).map(
                             ([key, value], cellIndex) => (
@@ -450,7 +450,7 @@ export default function Home() {
                                 }`}
                               >
                                 <div className="truncate" title={String(value)}>
-                                  {/* Podświetl wyszukiwany tekst */}
+                                  {/* Highlight searched text */}
                                   {searchTerm &&
                                   String(value)
                                     .toLowerCase()
@@ -475,11 +475,11 @@ export default function Home() {
                           <td className="border border-gray-200 px-1 py-1 text-center sticky right-0 bg-white">
                             <button
                               onClick={(e) => {
-                                e.stopPropagation(); // Zatrzymaj propagację kliknięcia
+                                e.stopPropagation(); // Stop click propagation
                                 addItemToEmail(row);
                               }}
                               className="bg-gray-500 hover:bg-gray-600 text-white px-1 py-1 rounded text-xs w-8 h-6"
-                              title="Kopiuj do schowka"
+                              title="Copy to clipboard"
                             >
                               �
                             </button>
@@ -493,7 +493,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* Komunikat gdy brak wyników */}
+          {/* Message when no results */}
           {filteredData && filteredData.length === 0 && searchTerm && (
             <div className="text-center py-8">
               <p className="text-gray-500">
@@ -509,7 +509,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* JSON w kodzie */}
+          {/* JSON code */}
           <details className="mt-4">
             <summary className="cursor-pointer font-medium text-gray-700 hover:text-gray-900">
               Show JSON{" "}
@@ -522,7 +522,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Komunikat gdy brak danych */}
+      {/* Message when no data */}
       {!data && !loadingFromDB && (
         <div className="text-center py-8">
           <p className="text-gray-500 mb-4">

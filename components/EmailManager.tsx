@@ -42,14 +42,14 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
 
   // Form states
   const [emailForm, setEmailForm] = useState({
-    to: [] as string[], // Zmieniam na array dla wielu adresatów
+    to: [] as string[], // Change to array for multiple recipients
     subject: "",
     message: "",
     attachData: false,
   });
 
-  const [currentEmail, setCurrentEmail] = useState(""); // Pole do wpisywania nowego emaila
-  const [searchTerm, setSearchTerm] = useState(""); // Pole do wyszukiwania kontaktów
+  const [currentEmail, setCurrentEmail] = useState(""); // Field for entering new email
+  const [searchTerm, setSearchTerm] = useState(""); // Field for searching contacts
 
   const [contactForm, setContactForm] = useState({
     name: "",
@@ -57,13 +57,13 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
     description: "",
   });
 
-  // Załaduj kontakty przy starcie
+  // Load contacts on start
   useEffect(() => {
     loadContacts();
     loadEmailHistory();
   }, []);
 
-  // Przekaż referencję do funkcji do komponentu nadrzędnego
+  // Pass reference to functions to parent component
   useEffect(() => {
     if (onRef) {
       onRef({
@@ -81,7 +81,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
         setContacts(json.contacts);
       }
     } catch (error) {
-      console.error("Błąd ładowania kontaktów:", error);
+      console.error("Error loading contacts:", error);
     }
   };
 
@@ -93,7 +93,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
         setEmailHistory(json.history);
       }
     } catch (error) {
-      console.error("Błąd ładowania historii:", error);
+      console.error("Error loading history:", error);
     }
   };
 
@@ -101,7 +101,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
     e.preventDefault();
 
     if (emailForm.to.length === 0) {
-      alert("Dodaj przynajmniej jednego odbiorcę");
+      alert("Add at least one recipient");
       return;
     }
 
@@ -124,16 +124,16 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
       const json = await res.json();
 
       if (json.success) {
-        alert("Email został wysłany!");
+        alert("Email has been sent!");
         setEmailForm({ to: [], subject: "", message: "", attachData: false });
         setCurrentEmail("");
-        loadEmailHistory(); // Odśwież historię
+        loadEmailHistory(); // Refresh history
       } else {
-        alert(`Błąd: ${json.error}`);
+        alert(`Error: ${json.error}`);
       }
     } catch (error) {
-      console.error("Błąd wysyłania emaila:", error);
-      alert("Błąd wysyłania emaila");
+      console.error("Error sending email:", error);
+      alert("Error sending email");
     } finally {
       setLoading(false);
     }
@@ -153,22 +153,22 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
       const json = await res.json();
 
       if (json.success) {
-        alert("Kontakt został dodany!");
+        alert("Contact has been added!");
         setContactForm({ name: "", email: "", description: "" });
-        loadContacts(); // Odśwież listę kontaktów
+        loadContacts(); // Refresh contacts list
       } else {
-        alert(`Błąd: ${json.error}`);
+        alert(`Error: ${json.error}`);
       }
     } catch (error) {
-      console.error("Błąd dodawania kontaktu:", error);
-      alert("Błąd dodawania kontaktu");
+      console.error("Error adding contact:", error);
+      alert("Error adding contact");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteContact = async (contactId: string) => {
-    if (!confirm("Czy na pewno chcesz usunąć ten kontakt?")) return;
+    if (!confirm("Are you sure you want to delete this contact?")) return;
 
     try {
       const res = await fetch(`/api/contacts?id=${contactId}`, {
@@ -178,19 +178,19 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
       const json = await res.json();
 
       if (json.success) {
-        alert("Kontakt został usunięty!");
-        loadContacts(); // Odśwież listę kontaktów
+        alert("Contact has been deleted!");
+        loadContacts(); // Refresh contacts list
       } else {
-        alert(`Błąd: ${json.error}`);
+        alert(`Error: ${json.error}`);
       }
     } catch (error) {
-      console.error("Błąd usuwania kontaktu:", error);
-      alert("Błąd usuwania kontaktu");
+      console.error("Error deleting contact:", error);
+      alert("Error deleting contact");
     }
   };
 
   const handleAddTestContacts = async () => {
-    if (!confirm("Czy chcesz dodać 5 testowych kontaktów?")) return;
+    if (!confirm("Do you want to add 5 test contacts?")) return;
 
     setLoading(true);
     try {
@@ -202,43 +202,43 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
 
       if (json.success) {
         const { results } = json;
-        let message = "Operacja zakończona!\n\n";
+        let message = "Operation completed!\n\n";
 
         if (results.added.length > 0) {
-          message += `✅ Dodano (${
+          message += `✅ Added (${
             results.added.length
           }):\n${results.added.join("\n")}\n\n`;
         }
 
         if (results.existing.length > 0) {
-          message += `ℹ️ Już istniały (${
+          message += `ℹ️ Already existed (${
             results.existing.length
           }):\n${results.existing.join("\n")}\n\n`;
         }
 
         if (results.errors.length > 0) {
-          message += `❌ Błędy (${
+          message += `❌ Errors (${
             results.errors.length
           }):\n${results.errors.join("\n")}\n\n`;
         }
 
-        message += `📊 Łącznie kontaktów w bazie: ${json.totalContacts}`;
+        message += `📊 Total contacts in database: ${json.totalContacts}`;
 
         alert(message);
-        loadContacts(); // Odśwież listę kontaktów
+        loadContacts(); // Refresh contacts list
       } else {
-        alert(`Błąd: ${json.error}`);
+        alert(`Error: ${json.error}`);
       }
     } catch (error) {
-      console.error("Błąd dodawania testowych kontaktów:", error);
-      alert("Błąd dodawania testowych kontaktów");
+      console.error("Error adding test contacts:", error);
+      alert("Error adding test contacts");
     } finally {
       setLoading(false);
     }
   };
 
   const selectContact = (contact: Contact) => {
-    // Dodaj kontakt do listy odbiorców jeśli jeszcze nie istnieje
+    // Add contact to recipients list if it doesn't exist yet
     setEmailForm((prev) => ({
       ...prev,
       to: prev.to.includes(contact.email)
@@ -248,24 +248,24 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
     setActiveTab("send");
   };
 
-  // Funkcje do zarządzania adresatami
+  // Functions for managing recipients
   const addEmailRecipient = () => {
     if (!currentEmail.trim()) return;
 
-    // Walidacja emaila
+    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(currentEmail)) {
-      alert("Nieprawidłowy format emaila");
+      alert("Invalid email format");
       return;
     }
 
-    // Sprawdź czy email już nie istnieje
+    // Check if email doesn't already exist
     if (emailForm.to.includes(currentEmail)) {
-      alert("Ten adres email już został dodany");
+      alert("This email address has already been added");
       return;
     }
 
-    // Dodaj email do listy
+    // Add email to list
     setEmailForm((prev) => ({
       ...prev,
       to: [...prev.to, currentEmail],
@@ -280,7 +280,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
     }));
   };
 
-  // Funkcja filtrowania kontaktów
+  // Contact filtering function
   const filteredContacts = contacts.filter((contact) => {
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -290,9 +290,9 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
     );
   });
 
-  // Funkcja do dodawania danych kolumny do wiadomości
+  // Function to add column data to message
   const addColumnDataToMessage = (columnName: string, columnData: string[]) => {
-    const columnText = `\n\n--- Dane z kolumny "${columnName}" ---\n${columnData.join("\n")}\n--- Koniec danych ---\n`;
+    const columnText = `\n\n--- Data from column "${columnName}" ---\n${columnData.join("\n")}\n--- End of data ---\n`;
 
     setEmailForm((prev) => ({
       ...prev,
@@ -300,7 +300,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
     }));
   };
 
-  // Funkcja do dodawania danych wiersza do wiadomości
+  // Function to add row data to message
   const addRowDataToMessage = (
     rowData: Record<string, unknown>,
     rowIndex: number,
@@ -309,7 +309,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
       .map(([key, value]) => `${key}: ${value}`)
       .join("\n");
 
-    const rowText = `\n\n--- Rekord #${rowIndex + 1} ---\n${formattedData}\n--- Koniec rekordu ---\n`;
+    const rowText = `\n\n--- Record #${rowIndex + 1} ---\n${formattedData}\n--- End of record ---\n`;
 
     setEmailForm((prev) => ({
       ...prev,
@@ -332,7 +332,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
-            Wyślij Email
+            Send Email
           </button>
           <button
             onClick={() => setActiveTab("contacts")}
@@ -342,7 +342,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
-            Kontakty ({contacts.length})
+            Contacts ({contacts.length})
           </button>
           <button
             onClick={() => setActiveTab("history")}
@@ -352,7 +352,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
-            Historia ({emailHistory.length})
+            History ({emailHistory.length})
           </button>
         </nav>
       </div>
@@ -363,14 +363,14 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
           <form onSubmit={handleSendEmail} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Odbiorcy
+                Recipients
               </label>
 
-              {/* Lista dodanych odbiorców */}
+              {/* List of added recipients */}
               {emailForm.to.length > 0 && (
                 <div className="mb-3 p-3 bg-gray-50 rounded border">
                   <div className="text-sm text-gray-600 mb-2">
-                    Dodani odbiorcy ({emailForm.to.length}):
+                    Added recipients ({emailForm.to.length}):
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {emailForm.to.map((email, index) => (
@@ -383,7 +383,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                           type="button"
                           onClick={() => removeEmailRecipient(email)}
                           className="ml-2 text-blue-600 hover:text-blue-800"
-                          title="Usuń odbiorcę"
+                          title="Remove recipient"
                         >
                           ×
                         </button>
@@ -393,7 +393,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                 </div>
               )}
 
-              {/* Pole dodawania nowego odbiorcy */}
+              {/* Field for adding new recipient */}
               <div className="space-y-3">
                 <div className="flex gap-2">
                   <input
@@ -414,11 +414,11 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                     onClick={addEmailRecipient}
                     className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm"
                   >
-                    Dodaj
+                    Add
                   </button>
                 </div>
 
-                {/* Sekcja wybierania z kontaktów */}
+                {/* Section for selecting from contacts */}
                 <div className="space-y-2">
                   <div className="flex gap-2 items-center">
                     <input
@@ -426,14 +426,14 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="flex-1 border border-gray-300 rounded px-3 py-2 text-black text-sm"
-                      placeholder="Wyszukaj kontakty..."
+                      placeholder="Search contacts..."
                     />
                     {searchTerm && (
                       <button
                         type="button"
                         onClick={() => setSearchTerm("")}
                         className="text-gray-500 hover:text-gray-700 text-sm px-2"
-                        title="Wyczyść wyszukiwanie"
+                        title="Clear search"
                       >
                         ✕
                       </button>
@@ -453,9 +453,9 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                     <option value="">
                       {filteredContacts.length === 0
                         ? searchTerm
-                          ? "Brak pasujących kontaktów"
-                          : "Brak kontaktów"
-                        : `Wybierz z kontaktów (${filteredContacts.length})`}
+                          ? "No matching contacts"
+                          : "No contacts"
+                        : `Select from contacts (${filteredContacts.length})`}
                     </option>
                     {filteredContacts.map((contact) => (
                       <option key={contact._id} value={contact._id}>
@@ -469,7 +469,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Temat
+                Subject
               </label>
               <input
                 type="text"
@@ -478,14 +478,14 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                   setEmailForm((prev) => ({ ...prev, subject: e.target.value }))
                 }
                 className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-                placeholder="Temat wiadomości"
+                placeholder="Message subject"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Wiadomość
+                Message
               </label>
               <textarea
                 value={emailForm.message}
@@ -493,7 +493,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                   setEmailForm((prev) => ({ ...prev, message: e.target.value }))
                 }
                 className="w-full border border-gray-300 rounded px-3 py-2 text-black h-32"
-                placeholder="Treść wiadomości..."
+                placeholder="Message content..."
                 required
               />
             </div>
@@ -513,7 +513,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                   className="mr-2"
                 />
                 <label htmlFor="attachData" className="text-sm text-gray-700">
-                  Załącz dane CSV ({data.length} rekordów)
+                  Attach CSV data ({data.length} records)
                 </label>
               </div>
             )}
@@ -523,7 +523,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
               disabled={loading}
               className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-6 py-2 rounded"
             >
-              {loading ? "Wysyłanie..." : "Wyślij Email"}
+              {loading ? "Sending..." : "Send Email"}
             </button>
           </form>
         </div>
@@ -535,13 +535,13 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
           {/* Add Contact Form */}
           <div className="border-b pb-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Dodaj Nowy Kontakt
+              Add New Contact
             </h3>
             <form onSubmit={handleAddContact} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nazwa
+                    Name
                   </label>
                   <input
                     type="text"
@@ -553,7 +553,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                       }))
                     }
                     className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-                    placeholder="Jan Kowalski"
+                    placeholder="John Doe"
                     required
                   />
                 </div>
@@ -571,14 +571,14 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                       }))
                     }
                     className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-                    placeholder="jan@example.com"
+                    placeholder="john@example.com"
                     required
                   />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Opis (opcjonalny)
+                  Description (optional)
                 </label>
                 <input
                   type="text"
@@ -590,7 +590,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                     }))
                   }
                   className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-                  placeholder="Manager, Dział logistyki..."
+                  placeholder="Manager, Logistics Department..."
                 />
               </div>
               <div className="flex justify-between items-center mb-4">
@@ -599,7 +599,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                   disabled={loading}
                   className="bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white px-6 py-2 rounded"
                 >
-                  {loading ? "Dodawanie..." : "Dodaj Kontakt"}
+                  {loading ? "Adding..." : "Add Contact"}
                 </button>
                 <button
                   type="button"
@@ -607,7 +607,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                   disabled={loading}
                   className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-4 py-2 rounded text-sm"
                 >
-                  Dodaj testowe kontakty
+                  Add test contacts
                 </button>
               </div>
             </form>
@@ -617,7 +617,7 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-gray-900">
-                Lista Kontaktów
+                Contacts List
               </h3>
               <div className="flex items-center gap-2">
                 <input
@@ -625,13 +625,13 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="border border-gray-300 rounded px-3 py-2 text-black text-sm"
-                  placeholder="Szukaj kontaktów..."
+                  placeholder="Search contacts..."
                 />
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm("")}
                     className="text-gray-500 hover:text-gray-700 text-sm"
-                    title="Wyczyść wyszukiwanie"
+                    title="Clear search"
                   >
                     ✕
                   </button>
@@ -641,16 +641,13 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
 
             {searchTerm && (
               <div className="mb-3 text-sm text-gray-600">
-                Znaleziono: {filteredContacts.length} z {contacts.length}{" "}
-                kontaktów
+                Found: {filteredContacts.length} of {contacts.length} contacts
               </div>
             )}
 
             {filteredContacts.length === 0 ? (
               <p className="text-gray-500">
-                {searchTerm
-                  ? "Brak kontaktów pasujących do wyszukiwania"
-                  : "Brak kontaktów"}
+                {searchTerm ? "No contacts matching the search" : "No contacts"}
               </p>
             ) : (
               <div className="space-y-2">
@@ -677,13 +674,13 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                         onClick={() => selectContact(contact)}
                         className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
                       >
-                        Wybierz
+                        Select
                       </button>
                       <button
                         onClick={() => handleDeleteContact(contact._id)}
                         className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
                       >
-                        Usuń
+                        Delete
                       </button>
                     </div>
                   </div>
@@ -698,18 +695,16 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
       {activeTab === "history" && (
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-900">
-              Historia Emaili
-            </h3>
+            <h3 className="text-lg font-medium text-gray-900">Email History</h3>
             <button
               onClick={loadEmailHistory}
               className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
             >
-              Odśwież
+              Refresh
             </button>
           </div>
           {emailHistory.length === 0 ? (
-            <p className="text-gray-500">Brak historii emaili</p>
+            <p className="text-gray-500">No email history</p>
           ) : (
             <div className="space-y-3">
               {emailHistory.map((email) => (
@@ -724,13 +719,13 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="font-medium text-gray-900">
-                        Do: {email.to}
+                        To: {email.to}
                       </div>
                       <div className="text-sm text-gray-600">
-                        Temat: {email.subject}
+                        Subject: {email.subject}
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
-                        {new Date(email.sentAt).toLocaleString("pl-PL")}
+                        {new Date(email.sentAt).toLocaleString("en-US")}
                       </div>
                       {email.attachmentInfo && (
                         <div className="text-sm text-blue-600 mt-1">
@@ -745,17 +740,17 @@ export default function EmailManager({ data, onRef }: EmailManagerProps) {
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {email.status === "sent" ? "Wysłany" : "Błąd"}
+                      {email.status === "sent" ? "Sent" : "Error"}
                     </div>
                   </div>
                   {email.error && (
                     <div className="mt-2 text-sm text-red-600">
-                      Błąd: {email.error}
+                      Error: {email.error}
                     </div>
                   )}
                   <details className="mt-2">
                     <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-800">
-                      Pokaż wiadomość
+                      Show message
                     </summary>
                     <div className="mt-1 p-2 bg-gray-100 rounded text-sm text-gray-700">
                       {email.message}
