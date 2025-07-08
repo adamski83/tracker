@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model CsvFile {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  filename    String   @unique
+  uploadDate  DateTime @default(now())
+  recordCount Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  records     CsvRecord[]
+  
+  @@map("csv_files")
+}
+
+model CsvRecord {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  fileId    String   @db.ObjectId
+  data      Json     // Przechowuje cały wiersz jako JSON
+  hash      String   @unique // Hash do sprawdzania duplikatów
+  createdAt DateTime @default(now())
+  
+  file      CsvFile  @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  @@map("csv_records")
+}
